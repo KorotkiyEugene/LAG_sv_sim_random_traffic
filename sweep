@@ -1,0 +1,32 @@
+
+if [ "$1" == "clean" ]; then
+  rm -f defines.v
+  rm -f parameters.v
+  rm -f *~ 
+  rm -f log*
+  rm -f base*
+  rm -f sweep.run*
+else
+#
+# Sweep
+#
+
+time bin/sweep.pl --config "--f router_config/baseline.config --router_num_pls 2 --router_num_pls_on_exit 2" \
+	 --model "sim_config/uniform-random" \
+         --sweep_param "sim_injection_rate" \
+         --sweep_values 0.01 0.1 0.3 0.4 0.42 0.44 0.46 0.48 0.5 \
+	 --result_file "LAG_buf4_packet5_2pl-" | tee log-base
+
+   time bin/sweep.pl --config "--f router_config/baseline.config --router_num_pls 4 --router_num_pls_on_exit 4" \
+	 --model "sim_config/uniform-random" \
+         --sweep_param "sim_injection_rate" \
+         --sweep_values 0.01 0.1 0.3 0.4 0.5 0.55 0.6 0.63 0.66 0.7 0.72 0.74 0.76 0.78 0.8 \
+	 --result_file "LAG_buf4_packet5_4pl-" | tee log-base
+   
+#
+# Create.dat files
+#
+rm -f *.dat
+bin/getplotdata.pl LAG_buf4_packet5_2pl- LAG_buf4_packet5_2pl.dat
+bin/getplotdata.pl LAG_buf4_packet5_4pl- LAG_buf4_packet5_4pl.dat
+fi
